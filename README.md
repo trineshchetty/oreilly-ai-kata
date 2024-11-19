@@ -1,0 +1,1 @@
+This is the Oreilly AI Kata Project By Old Mutual Platform Engineering team.
