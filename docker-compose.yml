@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:14.3-alpine
+    command: postgres -c 'max_connections=1000'
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=ecomm_db
+    networks:
+      - ai_assistant_app
+
+  # streamlit:
+  #   build:
+  #     context: ./src/chatui
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8501:8501"
+  #   environment:
+  #     - POSTGRES_HOST=postgres
+  #     - POSTGRES_PORT=5432
+  #     - POSTGRES_USER=user
+  #     - POSTGRES_PASSWORD=pass
+  #     - POSTGRES_DB=ecomm_db
+  #   networks:
+  #     - ai_assistant_app
+  #   depends_on:
+  #     - postgres
+
+networks:
+  ai_assistant_app:
+    driver: bridge
+
+volumes:
+  postgres:
