@@ -20,11 +20,17 @@ services:
   #   ports:
   #     - "8501:8501"
   #   environment:
+  #     - BEDROCK_MODEL_ID=anthropic.claude-3-5-sonnet-20240620-v1:0
+  #     - DATABASE_URI=postgresql://user:pass@postgres:5432/ecomm_db
   #     - POSTGRES_HOST=postgres
   #     - POSTGRES_PORT=5432
   #     - POSTGRES_USER=user
   #     - POSTGRES_PASSWORD=pass
   #     - POSTGRES_DB=ecomm_db
+  #     - AWS_REGION=us-east-1
+  #     - AWS_ACCESS_KEY_ID="ASIA6D6JBT34ZL5IF4W7"
+  #     - AWS_SECRET_ACCESS_KEY="A6NXim+2zDhs+tt6LhDEt5czs4vWkKPqB1Uk86TU"
+  #     - AWS_SESSION_TOKEN="IQoJb3JpZ2luX2VjEBIaCWV1LXdlc3QtMSJGMEQCICJfJImnfsd3H+OL+CVZZYXpRUyuuMykuRGN1tez/h7HAiAvWT4KyAhX3QMxAxUXH6a9O1xNniNccqsSOc8SNPL2yCqgAwir//////////8BEAAaDDk3MDU0NzM3MTc2OSIMomSr3Lct4t7/vVKeKvQC2W0YcmOLOY4R4j3s387Q61AXCnkizSwPiHoSGySC6AFM7rBc0TT8dbiGbE3rufZYkNoFKRuE/Je85A/f7g4iyXMC3lXXzCtlx/cgLQeisXXLlwxCZ8KCFtbAI2m1ShBF0FjUQG5gu0PuityKsvcouibfa0ZgOM9ploY6hq3mcbe3aq0JcKCL9O2Bkp/DrzEwXCE8Y4wpM1fLYdrlb0SEcj0lXvtRvnSpDWrlrAuUTitP/m6sxVhzZCLrZoJhZaJeV1ns/wFU14fjcoYjt7v6b/gpfoGkVqyt2mq9c8GwozcirRkHBssJULZd9FeTwt65yvZpQXTeGjufNKBOti8bUWbeYBEBjAffJ9L0Kfpp7wACUWmZ5cOPBM0/5SEp1/D6EeyDMJEMtFtJapD/qoa+gkUm9Kkha/vjljZefUB079lOsgf5pzqu/hairEXqZ5/C36J1r6OlBKqzG10t3PZHcSPvZM0tmHw26E/fv/fsy+naarGyMKXc/bkGOqcB7TiKxErwY4YVgdV+R5WlHvJW/n6IjQCN2CT8A0e1wRR8pSTXvKTeuVpXHNheHWwQrPYArYG+dD5/9EK0HqbM3kKkIoHP7eHT+JeEWjDVSap91cx9tjbrfKfspXXU3ZVqBuddtzgyl+LcxU0J4Yhg9QoepaoFpUQJlGcNuDLM+esGtbcYhtC1wIu6rbRS+foZ9pm062FSDLVQdpzjp+SkEixoKcpiVeo="
   #   networks:
   #     - ai_assistant_app
   #   depends_on:

@@ -11,4 +11,3 @@ We will use Claude 3.5 Sonnet as the LLM of choice as CLaude 3.5 Sonnet is good 
 
 Consequences
 What becomes easier or more difficult to do because of this change?
-
