@@ -2,7 +2,9 @@ Title: Choosing the right Database
 
 Database: PostgreSQL
 
-Context we chose to use AWS PostgreSQL database for storage of products and orders data. The database was used to host the data that is queried aby the customers, retrieving information based on the questions asked. The user is able to ask questions about the products and orders in natural language and the LLM will return the answer.
+Context 
+
+we chose to use AWS PostgreSQL database for storage of products and orders data. The database was used to host the data that is queried aby the customers, retrieving information based on the questions asked. The user is able to ask questions about the products and orders in natural language and the LLM will return the answer.
 
 Why PostgreSQL
 
