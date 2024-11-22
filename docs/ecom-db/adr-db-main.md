@@ -1,17 +1,11 @@
-Decision record template by Michael Nygard
-This is the template in Documenting architecture decisions - Michael Nygard. You can use adr-tools for managing the ADR files.
+Title: Choosing the right Database
 
-In each ADR file, write these sections:
+Database: PostgreSQL
 
-Title
-Status
-What is the status, such as proposed, accepted, rejected, deprecated, superseded, etc.?
+Context we chose to use AWS PostgreSQL database for storage of products and orders data. The database was used to host the data that is queried aby the customers, retrieving information based on the questions asked. The user is able to ask questions about the products and orders in natural language and the LLM will return the answer.
 
-Context
-What is the issue that we're seeing that is motivating this decision or change?
+Why PostgreSQL
 
-Decision
-What is the change that we're proposing and/or doing?
+PostgreSQL offers a blend of reliability, performance, and flexibility unmatched by many other databases. Whether you need strong SQL capabilities, JSON support for semi-structured data, or advanced customizations, PostgreSQL is a versatile, cost-effective, and future-proof solution.
 
-Consequences
-What becomes easier or more difficult to do because of this change?
+For the e-commerce AI assistant solution, PostgreSQL's scalability, transactional integrity, and ability to handle complex queries made it a strong contender.
