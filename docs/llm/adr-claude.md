@@ -1,6 +1,6 @@
 Title: Choosing the right LLM for the project
 
-Status: Proposed
+Status: USED
 
 Context
 For this project, we chose AWS Bedrock LLM to understand our catelog of products and orders.
@@ -10,5 +10,12 @@ Decision
 We will use Claude 3.5 Sonnet as the LLM of choice as CLaude 3.5 Sonnet is good at writing code and has larger context windows compared to ChatGPT.
 
 Consequences
-What becomes easier or more difficult to do because of this change?
+What becomes easier or to do because of AWS Bedrock LLM?
+AWS Bedrock stands out for its flexibility, scalability, and integration with the AWS ecosystem, making it an ideal choice for businesses looking to build AI-powered applications. It simplifies access to multiple LLMs without requiring ML expertise or infrastructure management, allowing teams to focus on innovation and delivering value.
+
+For Tthis project, Bedrock can power features like:
+
+Conversational AI for customer interactions.
+Personalized shopping experiences.
+Automated content generation (e.g., product descriptions).
 
