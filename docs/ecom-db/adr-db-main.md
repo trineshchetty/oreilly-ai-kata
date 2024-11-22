@@ -1,8 +1,3 @@
-Decision record template by Michael Nygard
-This is the template in Documenting architecture decisions - Michael Nygard. You can use adr-tools for managing the ADR files.
-
-In each ADR file, write these sections:
-
 Title
 Status
 What is the status, such as proposed, accepted, rejected, deprecated, superseded, etc.?

@@ -5,7 +5,8 @@ from langchain_aws import ChatBedrock
 from dotenv import load_dotenv
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-
+from langchain_community.utilities import SQLDatabase
+from langchain_core.runnables import RunnablePassthrough
 
 load_dotenv()
 
@@ -13,41 +14,172 @@ load_dotenv()
 st.set_page_config(page_title="Customer Service Bot", page_icon="🤖")
 st.title("Customer Service Bot")
 
+
+def get_database_connection():
+    db_user = os.environ.get("DB_USER")
+    db_pass = os.environ.get("DB_PASS")
+    db_host = os.environ.get("DB_ENDPOINT")
+    db_port = 5432
+    db_name = os.environ.get("DB_NAME")
+
+    db_uri = f"postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
+
+    try:
+        # Use `from_uri` to initialize the SQLDatabase
+        db = SQLDatabase.from_uri(db_uri)
+        print("Database connection established successfully.")
+        return db
+    except Exception as e:
+        print(f"Error connecting to the database: {e}")
+        raise
+
+
+def handle_no_data_or_error(response):
+    if response == "No data available to answer your query. Please try rephrasing your question.":
+        # Re-engage the user by asking for clarification
+        return "I'm sorry, I couldn't find any relevant information based on your question. Could you rephrase or ask in a different way?"
+    elif response.startswith("An error occurred"):
+        # Re-engage the user by asking to simplify the question
+        return "It seems there was an issue processing your query. Could you try asking your question differently, to you help with your query?"
+    else:
+        return response
+
+def normalize_query(query):
+    # Remove comments
+    lines = query.splitlines()
+    stripped_lines = [line.split('--')[0].strip() for line in lines if not line.strip().startswith('--')]
+    normalized_query = ' '.join(stripped_lines).strip()
+    return normalized_query.lower()
+
+
 def get_response(user_query, chat_history):
+    db = get_database_connection()
 
-    template = """
-    You are a helpful assistant. Answer the following questions considering the history of the conversation:
+    def run_query(query):
 
-    Chat history: {chat_history}
+        normalized = normalize_query(query)
+        print(normalized)
 
-    User question: {user_question}
+        if normalized.startswith('select'):
+            return db.run(query)
+        else:
+            return "Invalid SQL query. Please provide a valid SELECT or SHOW statement."
+
+    # SQL generation template
+    sql_template = """
+    Act as a Customer Service Representative.
+
+    Based on the following schema, write a SQL query to answer the user's question. 
+    If the user's question cannot be answered with a SQL query, respond with "No SQL query needed."
+    Do not provide explanations, preambles, or additional text. Only output the SQL query or the exact phrase "No SQL query needed."
+
+    Follow these rules strictly:
+    - Do not include any descriptive text, comments, or markdown formatting.
+    - Ensure the output begins directly with the SQL query or "No SQL query needed."
+    - If the user asks about sales, for example top selling products, count the number of products ordered.
+    - When filtering data prioritize using `tsquery` to search for keywords in the search column.
+    - Ensure that when using tsquery that is is in the format: where search @@ to_tsquery('xyz:*')
+    - Ensure the SQL query retrieves relevant information even if exact matches are not found in the `category` column.
+    - When performing calculations (e.g., dividing `rating` by `price`), ensure that values in the denominator (e.g., `price`) are not zero by adding an appropriate filter (e.g., `price > 0`) to the WHERE clause.
+
+    Schema: {schema}
+    Question: {question}
     """
+    
+    sql_prompt = ChatPromptTemplate.from_template(sql_template)
 
-    prompt = ChatPromptTemplate.from_template(template)
+    # Response template
+    response_template = """
+    ShopWise Solutions is an innovative and fast-growing e-commerce company based in Austin,
+    Texas, USA. Our online platform hosts a wide range of consumer products, spanning
+    electronics, apparel, home goods, and much more. ShopWise Solutions has built a reputation
+    for exceptional customer experience, streamlined order fulfillment, and a diverse catalog of
+    quality products. We also deliver Globally.
 
+
+    Conditions for conversations:
+    1. If the user greets you, please greet back.
+    2. If the user asks you about the business, do answer.
+    3. If the user asks about anything else besides products, orders and Shopwise, ensure that they understand that you are only able to provice information on Shopwise Products and Orders.
+    4. Do not sound technical.
+
+
+    Based on the table schema below, question, sql query, and sql response, write a natural language response:
+    Schema: {schema}
+    
+    If the SQL query does not return any data attempt to query the alternative table.
+    For example if orders return no data, try querying the product table.
+
+    Question: {question}
+    SQL Query: {query}
+    SQL Response: {response}
+
+    Chat History: {chat_history}
+    """
+    
+    response_prompt = ChatPromptTemplate.from_template(response_template)
 
     llm = ChatBedrock(
         model_id="anthropic.claude-3-5-sonnet-20240620-v1:0",
-        region_name="us-east-1",
-        aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'),
-        aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
+        region_name=os.environ.get("AWS_REGION")
     )
 
-    chain = prompt | llm | StrOutputParser()
+    # Get schema once
+    sql_schema = db.get_table_info()
 
-    return chain.stream({
-        "chat_history": chat_history,
-        "user_question": user_query,
-    })
-    
+    # SQL Generation Chain
+    sql_chain = (
+        RunnablePassthrough.assign(schema=lambda _: sql_schema)
+        | sql_prompt
+        | llm.bind(stop=["\SQL Query:"])
+        | StrOutputParser()
+    )
+
+    def process_sql_response(vars):
+        query = vars["query"]
+        if query.strip().lower() == "no sql query needed":
+            return "No SQL query was needed to answer this question."
+        else:
+            try:
+                if "limit" not in query.lower():
+                    query = query.rstrip(";")
+                    query += " LIMIT 100"
+
+                result = run_query(query)
+
+                print(result)
+            
+                if isinstance(result, str) and result.startswith("No data"):
+                    return handle_no_data_or_error(result)
+                return result
+
+            except Exception as e:
+                # Log the error
+                print(f"Query Error: {e}")
+                # Handle the error and re-prompt the model
+                return handle_no_data_or_error(f"An error occurred: {e}")
+
+    # Full chain
+    full_chain = (
+        RunnablePassthrough.assign(query=sql_chain)
+        .assign(
+            schema=lambda _: sql_schema,
+            response=process_sql_response,
+            chat_history=lambda _: chat_history
+        )
+        | response_prompt
+        | llm
+        | StrOutputParser()
+    )
+
+    return full_chain.stream({"question": user_query})
 
 # session state
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [
-        AIMessage(content="Hello, I am a bot. How can I help you?"),
+        AIMessage(content="Hello, Welcome to Shopwise Solutions. My name is Ellie, your AI Assistant. How may I help you today?"),
     ]
 
-    
 # conversation
 for message in st.session_state.chat_history:
     if isinstance(message, AIMessage):

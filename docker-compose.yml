@@ -13,22 +13,24 @@ services:
     networks:
       - ai_assistant_app
 
-  # streamlit:
-  #   build:
-  #     context: ./src/chatui
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8501:8501"
-  #   environment:
-  #     - POSTGRES_HOST=postgres
-  #     - POSTGRES_PORT=5432
-  #     - POSTGRES_USER=user
-  #     - POSTGRES_PASSWORD=pass
-  #     - POSTGRES_DB=ecomm_db
-  #   networks:
-  #     - ai_assistant_app
-  #   depends_on:
-  #     - postgres
+  streamlit:
+    build:
+      context: ./src/chatui
+      dockerfile: Dockerfile
+    ports:
+      - "8501:8501"
+    environment:
+      - BEDROCK_MODEL_ID=anthropic.claude-3-5-sonnet-20240620-v1:0
+      - DATABASE_URI=postgresql://user:pass@postgres:5432/ecomm_db
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=ecomm_db
+    networks:
+      - ai_assistant_app
+    depends_on:
+      - postgres
 
 networks:
   ai_assistant_app:
