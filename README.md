@@ -36,6 +36,8 @@
 - **Query Execution**: Queries executed against Postgres, with results fed back for natural language conversion.
 
 ![chat-with-mysql-chain-langchain](https://github.com/user-attachments/assets/37a776b7-1d60-47c2-b729-ca2322e65112)
+
+App Link: http://customer-chatbot-771534023.us-east-1.elb.amazonaws.com/
 ---
 
 ## Future Improvements
